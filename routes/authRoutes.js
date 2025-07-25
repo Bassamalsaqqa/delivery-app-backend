@@ -1,6 +1,7 @@
 const express = require('express');
 const { body } = require('express-validator');
 const authController = require('../controllers/authController');
+console.log('Register is:', typeof authController.register); // should log 'function'
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();

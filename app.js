@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const cors = require('cors'); // <-- added
+
 const firebaseAdmin = require('firebase-admin');
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
@@ -15,12 +17,14 @@ dotenv.config();
 
 const app = express();
 
-// Middleware to parse JSON bodies
+// CORS + JSON middleware
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true,
+}));
 app.use(express.json());
 
-// Initialise Firebase admin if credentials are provided. This will be used for
-// sending push notifications. If the necessary environment variables are not
-// set, the application will continue to run without Firebase.
+// Firebase Admin Initialization
 if (
   process.env.FIREBASE_PROJECT_ID &&
   process.env.FIREBASE_CLIENT_EMAIL &&
@@ -40,7 +44,7 @@ if (
   }
 }
 
-// Connect to MongoDB
+// MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -49,7 +53,7 @@ mongoose
   .then(() => console.log('MongoDB connected'))
   .catch((err) => console.error('MongoDB connection error', err));
 
-// Register API routes
+// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
@@ -58,7 +62,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/profile', profileRoutes);
 
-// Basic root route
+// Root route
 app.get('/', (req, res) => {
   res.send({ message: 'Mankousheh Go backend is running' });
 });
